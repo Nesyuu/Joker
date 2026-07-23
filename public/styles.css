@@ -622,18 +622,19 @@ h1 {
 
 .role-card {
   display: grid;
-  width: min(84vw, 330px);
-  min-height: 440px;
+  width: min(88vw, 370px);
+  min-height: 430px;
   place-items: center;
   align-content: stretch;
   grid-template-rows: auto 1fr auto;
-  gap: 18px;
-  padding: 30px 26px;
+  gap: 16px;
+  padding: 30px 28px;
   border: 2px solid rgba(255, 255, 255, 0.72);
   color: var(--ink);
   background:
-    radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.75), transparent 28%),
-    linear-gradient(135deg, #fff8eb 0%, #ffd6e0 48%, #d8f3ff 100%);
+    radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.84), transparent 28%),
+    radial-gradient(circle at 88% 78%, rgba(58, 134, 255, 0.22), transparent 28%),
+    linear-gradient(135deg, #fff8eb 0%, #ffd9e5 50%, #d8f3ff 100%);
   box-shadow: 0 28px 70px rgba(0, 0, 0, 0.32);
   text-align: center;
   transform: rotate(-2deg);
@@ -654,23 +655,24 @@ h1 {
 }
 
 .role-card strong {
-  display: grid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   min-width: 0;
   width: 100%;
-  min-height: 170px;
-  place-items: center;
-  overflow-wrap: anywhere;
+  min-height: 180px;
+  white-space: nowrap;
   font-family: Georgia, serif;
-  font-size: clamp(3.3rem, 16vw, 5.4rem);
-  line-height: 0.88;
+  font-size: clamp(3.7rem, 17vw, 5.35rem);
+  line-height: 1;
   letter-spacing: 0;
   text-align: center;
-  text-shadow: 0 5px 0 rgba(255, 255, 255, 0.24);
+  text-shadow: 0 6px 0 rgba(255, 255, 255, 0.26);
 }
 
 .role-card small {
   align-self: end;
-  max-width: 230px;
+  max-width: 260px;
   color: currentColor;
   opacity: 0.78;
   font-size: 0.98rem;
