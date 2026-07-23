@@ -287,6 +287,12 @@ h1 {
   backdrop-filter: blur(14px);
 }
 
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .caption {
   display: block;
   color: var(--muted);
@@ -315,6 +321,29 @@ h1 {
   text-align: center;
   font-size: 0.85rem;
   font-weight: 900;
+}
+
+.leave-icon {
+  display: grid;
+  width: 42px;
+  min-width: 42px;
+  height: 42px;
+  min-height: 42px;
+  place-items: center;
+  border-color: rgba(239, 71, 111, 0.24);
+  color: var(--red);
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 8px 18px rgba(23, 32, 51, 0.08);
+}
+
+.leave-icon svg {
+  width: 21px;
+  height: 21px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.2;
 }
 
 .card {

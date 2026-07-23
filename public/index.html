@@ -46,7 +46,16 @@
             <span class="caption">Room</span>
             <button id="copyCodeBtn" class="code" title="Copy room code">-----</button>
           </div>
-          <div class="status" id="phaseLabel">Lobby</div>
+          <div class="topbar-actions">
+            <div class="status" id="phaseLabel">Lobby</div>
+            <button id="topLeaveBtn" class="leave-icon" title="Leave room" aria-label="Leave room">
+              <svg aria-hidden="true" viewBox="0 0 24 24">
+                <path d="M10 5H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4" />
+                <path d="M15 8l4 4-4 4" />
+                <path d="M8 12h11" />
+              </svg>
+            </button>
+          </div>
         </header>
 
         <section class="card" id="secretCard">

@@ -7,6 +7,7 @@ const codeInput = document.querySelector("#codeInput");
 const createBtn = document.querySelector("#createBtn");
 const joinBtn = document.querySelector("#joinBtn");
 const copyCodeBtn = document.querySelector("#copyCodeBtn");
+const topLeaveBtn = document.querySelector("#topLeaveBtn");
 const phaseLabel = document.querySelector("#phaseLabel");
 const secretCard = document.querySelector("#secretCard");
 const cardTitle = document.querySelector("#cardTitle");
@@ -170,6 +171,7 @@ function returnToEntry() {
   localStorage.removeItem("joker.playerId");
   codeInput.value = "";
   copyCodeBtn.textContent = "-----";
+  topLeaveBtn.disabled = false;
   phaseLabel.textContent = "Lobby";
   secretCard.dataset.card = "WAITING";
   secretCard.classList.remove("is-new");
@@ -499,11 +501,9 @@ function renderActions(room) {
           showToast(error.message);
         }
       }));
-      actions.append(leaveRoomButton());
       return;
     }
     actions.append(waitingButton("Waiting for host", "The host starts the next round."));
-    actions.append(leaveRoomButton());
   }
 }
 
@@ -689,6 +689,7 @@ joinBtn.addEventListener("click", async () => {
 });
 
 copyCodeBtn.addEventListener("click", copyInvite);
+topLeaveBtn.addEventListener("click", leaveRoom);
 
 const roomFromUrl = new URLSearchParams(location.search).get("room");
 if (roomFromUrl) codeInput.value = roomFromUrl.toUpperCase();
