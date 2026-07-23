@@ -675,6 +675,54 @@ h1 {
   transform: rotate(4deg);
 }
 
+.role-card[data-card="TARGET"] {
+  width: min(88vw, 390px);
+  min-height: min(86vh, 590px);
+  grid-template-rows: 1fr auto auto;
+  gap: 8px;
+  padding: 30px 30px 36px;
+  border: 10px solid #f4ead6;
+  color: #f4ead6;
+  background:
+    linear-gradient(#9d1414, #9d1414) 26px 26px / calc(100% - 52px) 2px no-repeat,
+    linear-gradient(#9d1414, #9d1414) 26px calc(100% - 26px) / calc(100% - 52px) 2px no-repeat,
+    linear-gradient(90deg, #9d1414, #9d1414) 26px 26px / 2px calc(100% - 52px) no-repeat,
+    linear-gradient(90deg, #9d1414, #9d1414) calc(100% - 26px) 26px / 2px calc(100% - 52px) no-repeat,
+    radial-gradient(circle at 50% 26%, rgba(230, 0, 18, 0.32), transparent 30%),
+    radial-gradient(circle at 50% 26%, rgba(244, 234, 214, 0.08), transparent 18%),
+    linear-gradient(135deg, #101010 0%, #171717 54%, #0b0b0b 100%);
+  box-shadow: 0 30px 74px rgba(0, 0, 0, 0.42);
+}
+
+.role-card[data-card="TARGET"]::before {
+  left: 50%;
+  right: auto;
+  top: 78px;
+  width: 226px;
+  height: 226px;
+  opacity: 0.88;
+  background:
+    radial-gradient(circle, #e60012 0 13%, #f4ead6 14% 26%, #111111 27% 42%, #f4ead6 43% 55%, #e60012 56% 72%, transparent 73%),
+    conic-gradient(from 45deg, transparent 0 8%, #e60012 8% 11%, transparent 11% 25%, #f4ead6 25% 28%, transparent 28% 50%, #e60012 50% 53%, transparent 53% 75%, #f4ead6 75% 78%, transparent 78% 100%);
+  box-shadow:
+    inset 0 0 0 8px rgba(17, 17, 17, 0.72),
+    0 0 0 30px rgba(157, 20, 20, 0.45);
+  transform: translateX(-50%) rotate(0);
+}
+
+.role-card[data-card="TARGET"]::after {
+  left: 50%;
+  right: auto;
+  top: 50px;
+  width: 64px;
+  height: 284px;
+  opacity: 0.82;
+  background: #e60012;
+  clip-path: polygon(50% 0, 65% 39%, 100% 50%, 65% 61%, 50% 100%, 35% 61%, 0 50%, 35% 39%);
+  box-shadow: none;
+  transform: translateX(-50%);
+}
+
 .role-card[data-card="JOKER"] {
   width: min(88vw, 390px);
   min-height: min(86vh, 590px);
@@ -771,6 +819,35 @@ h1 {
   font-family: Georgia, serif;
   font-size: clamp(1.4rem, 7vw, 2.1rem);
   opacity: 1;
+}
+
+.role-card[data-card="TARGET"] .caption {
+  align-self: end;
+  justify-self: center;
+  margin-top: 300px;
+  border: 0;
+  color: #f4ead6;
+  background: transparent;
+  box-shadow: none;
+  font-family: Georgia, serif;
+  font-size: clamp(1.4rem, 7vw, 2.1rem);
+  opacity: 1;
+}
+
+.role-card[data-card="TARGET"] strong {
+  min-height: 0;
+  color: #f4ead6;
+  font-family: "Trebuchet MS", Impact, system-ui, sans-serif;
+  font-size: clamp(3.55rem, 16vw, 5.4rem);
+  font-style: italic;
+  line-height: 0.9;
+  text-shadow: 0 4px 0 rgba(230, 0, 18, 0.54);
+  transform: skewX(-8deg);
+}
+
+.role-card[data-card="TARGET"] small {
+  max-width: 280px;
+  color: rgba(244, 234, 214, 0.82);
 }
 
 .role-card[data-card="JOKER"] strong {
