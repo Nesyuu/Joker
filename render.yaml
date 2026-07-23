@@ -1,7 +1,0 @@
-services:
-  - type: web
-    name: joker-hint
-    env: node
-    plan: free
-    buildCommand: npm install
-    startCommand: npm start

@@ -128,7 +128,7 @@ function deal(room) {
 
 function serveStatic(req, res) {
   const url = new URL(req.url, `http://${req.headers.host}`);
-  let filePath = path.normalize(path.join(PUBLIC_DIR, url.pathname === "/" ? "index.html" : url.pathname));
+  const filePath = path.normalize(path.join(PUBLIC_DIR, url.pathname === "/" ? "index.html" : url.pathname));
 
   if (!filePath.startsWith(PUBLIC_DIR)) {
     res.writeHead(403);

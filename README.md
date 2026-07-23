@@ -10,10 +10,17 @@ npm start
 
 Then open `http://localhost:4173`.
 
-## Deploy on Render
+## Deploy on Cloudflare
 
-- Create a free Render account.
-- Create a new Web Service from this project.
-- Use `npm install` as the build command.
-- Use `npm start` as the start command.
+- Create a free Cloudflare account.
+- Install dependencies with `npm install`.
+- Log in with `npx wrangler login`.
+- Deploy with `npm run deploy`.
 
+Cloudflare will give you a public URL like:
+
+```text
+https://joker-hint.your-name.workers.dev
+```
+
+The deployed version uses a Cloudflare Worker plus Durable Objects for game rooms.
