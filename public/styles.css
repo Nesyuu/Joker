@@ -626,8 +626,8 @@ h1 {
   min-height: 430px;
   place-items: center;
   align-content: stretch;
-  grid-template-rows: auto 1fr auto;
-  gap: 16px;
+  grid-template-rows: auto minmax(190px, 1fr) auto;
+  gap: 14px;
   padding: 30px 28px;
   border: 2px solid rgba(255, 255, 255, 0.72);
   color: var(--ink);
@@ -660,14 +660,16 @@ h1 {
   justify-content: center;
   min-width: 0;
   width: 100%;
-  min-height: 180px;
+  min-height: 190px;
   white-space: nowrap;
-  font-family: Georgia, serif;
-  font-size: clamp(3.7rem, 17vw, 5.35rem);
+  font-family: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+  font-size: clamp(3.15rem, 15vw, 4.75rem);
+  font-weight: 950;
   line-height: 1;
   letter-spacing: 0;
   text-align: center;
-  text-shadow: 0 6px 0 rgba(255, 255, 255, 0.26);
+  text-shadow: 0 4px 0 rgba(255, 255, 255, 0.28);
+  transform: translateY(8px);
 }
 
 .role-card small {
