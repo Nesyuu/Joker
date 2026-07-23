@@ -348,14 +348,18 @@ h1 {
 
 .card {
   position: relative;
-  min-height: 224px;
-  padding: 20px;
+  display: grid;
+  align-content: center;
+  min-height: 236px;
+  padding: 24px;
   overflow: hidden;
-  border: 0;
+  border: 1px solid rgba(255, 255, 255, 0.72);
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.68), rgba(255, 255, 255, 0.18)),
-    linear-gradient(135deg, #fff7de 0%, #e9f8ff 100%);
-  box-shadow: 0 18px 42px rgba(23, 32, 51, 0.14);
+    radial-gradient(circle at 12% 18%, rgba(255, 255, 255, 0.82), transparent 28%),
+    radial-gradient(circle at 88% 14%, rgba(255, 107, 107, 0.18), transparent 26%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.76), rgba(255, 255, 255, 0.28)),
+    linear-gradient(135deg, #fff5d6 0%, #ffdce7 44%, #dcf5ff 100%);
+  box-shadow: 0 20px 46px rgba(23, 32, 51, 0.15);
   transform-style: preserve-3d;
 }
 
@@ -372,8 +376,16 @@ h1 {
 
 .card[data-card="TARGET"] {
   background:
-    radial-gradient(circle at 15% 20%, rgba(255, 255, 255, 0.65), transparent 28%),
+    radial-gradient(circle at 16% 18%, rgba(255, 255, 255, 0.76), transparent 28%),
+    radial-gradient(circle at 92% 18%, rgba(58, 134, 255, 0.16), transparent 28%),
     linear-gradient(135deg, #fff4d6 0%, #ffd6e0 52%, #d8f3ff 100%);
+}
+
+.card[data-card="WAITING"] {
+  background:
+    radial-gradient(circle at 14% 18%, rgba(255, 255, 255, 0.8), transparent 28%),
+    radial-gradient(circle at 88% 20%, rgba(123, 97, 255, 0.14), transparent 30%),
+    linear-gradient(135deg, #fff0dc 0%, #ffe4ed 45%, #e6f7ff 100%);
 }
 
 .card::after {
@@ -381,8 +393,8 @@ h1 {
   position: absolute;
   right: -28px;
   bottom: -44px;
-  width: 150px;
-  height: 210px;
+  width: 142px;
+  height: 196px;
   border: 2px solid rgba(255, 255, 255, 0.45);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.42);
@@ -393,7 +405,7 @@ h1 {
   content: "";
   position: absolute;
   inset: 12px;
-  border: 1px dashed rgba(23, 32, 51, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.56);
   border-radius: 8px;
   pointer-events: none;
 }
@@ -406,11 +418,32 @@ h1 {
 .card h2 {
   position: relative;
   z-index: 1;
-  margin-top: 14px;
+  max-width: min(100%, 430px);
+  margin-top: 16px;
   font-family: Georgia, serif;
-  font-size: clamp(2.5rem, 14vw, 5rem);
-  line-height: 0.9;
-  text-shadow: 0 4px 0 rgba(255, 255, 255, 0.26);
+  font-size: clamp(3.1rem, 13vw, 5rem);
+  line-height: 0.92;
+  letter-spacing: 0;
+  text-wrap: balance;
+  text-shadow: 0 5px 0 rgba(255, 255, 255, 0.25);
+}
+
+.card > .caption,
+.role-card .caption,
+.vote-card .caption {
+  justify-self: start;
+  width: max-content;
+  max-width: 100%;
+  padding: 7px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.56);
+  border-radius: 8px;
+  color: rgba(23, 32, 51, 0.68);
+  background: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 8px 18px rgba(23, 32, 51, 0.06);
+}
+
+.card[data-card="WAITING"] h2 {
+  font-size: clamp(2.8rem, 11vw, 4.35rem);
 }
 
 .card p,
@@ -419,9 +452,23 @@ h1 {
   z-index: 1;
 }
 
+.card p {
+  max-width: 420px;
+  margin-top: 12px;
+  font-size: 1.05rem;
+  line-height: 1.35;
+  font-weight: 700;
+}
+
 .card[data-card="JOKER"] .caption,
 .card[data-card="JOKER"] p {
   color: rgba(255, 255, 255, 0.78);
+}
+
+.card[data-card="JOKER"] > .caption,
+.role-card[data-card="JOKER"] .caption {
+  color: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.16);
 }
 
 .targets {
@@ -576,11 +623,12 @@ h1 {
 .role-card {
   display: grid;
   width: min(84vw, 330px);
-  min-height: 430px;
+  min-height: 440px;
   place-items: center;
-  align-content: center;
+  align-content: stretch;
+  grid-template-rows: auto 1fr auto;
   gap: 18px;
-  padding: 28px;
+  padding: 30px 26px;
   border: 2px solid rgba(255, 255, 255, 0.72);
   color: var(--ink);
   background:
@@ -600,18 +648,28 @@ h1 {
 }
 
 .role-card .caption {
+  align-self: start;
   color: currentColor;
   opacity: 0.72;
 }
 
 .role-card strong {
+  display: grid;
+  min-width: 0;
+  width: 100%;
+  min-height: 170px;
+  place-items: center;
+  overflow-wrap: anywhere;
   font-family: Georgia, serif;
-  font-size: clamp(3.6rem, 18vw, 6rem);
-  line-height: 0.85;
+  font-size: clamp(3.3rem, 16vw, 5.4rem);
+  line-height: 0.88;
   letter-spacing: 0;
+  text-align: center;
+  text-shadow: 0 5px 0 rgba(255, 255, 255, 0.24);
 }
 
 .role-card small {
+  align-self: end;
   max-width: 230px;
   color: currentColor;
   opacity: 0.78;
