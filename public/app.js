@@ -710,6 +710,8 @@ function renderRoleReveal(room) {
   }
 
   const [title, text] = cardCopy(room);
+  const caption = roleRevealBtn.querySelector(".caption");
+  caption.textContent = room.me.isJoker ? "You're the" : "Your secret role";
   roleRevealTitle.textContent = title;
   roleRevealText.textContent = text;
   roleRevealBtn.dataset.card = room.me.card;
