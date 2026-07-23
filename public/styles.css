@@ -683,39 +683,35 @@ h1 {
 }
 
 .role-card[data-card="JOKER"]::before {
-  content: "J";
-  right: -2px;
-  top: 82px;
-  display: grid;
-  place-items: center;
-  width: 138px;
-  height: 178px;
-  border-radius: 0;
-  color: rgba(255, 255, 255, 0.24);
-  background: transparent;
-  font-family: Georgia, serif;
-  font-size: 10.5rem;
-  font-weight: 900;
-  line-height: 1;
-  opacity: 1;
+  content: "";
+  right: -42px;
+  top: 72px;
+  width: 204px;
+  height: 204px;
+  border-radius: 50%;
+  opacity: 0.28;
+  background:
+    radial-gradient(circle at 50% 54%, rgba(255, 255, 255, 0.92) 0 23%, transparent 24%),
+    radial-gradient(circle at 26% 48%, rgba(255, 255, 255, 0.88) 0 16%, transparent 17%),
+    radial-gradient(circle at 74% 48%, rgba(255, 255, 255, 0.88) 0 16%, transparent 17%),
+    conic-gradient(from -90deg, #111827 0 50%, #e60012 0 100%);
+  box-shadow: inset 0 0 0 16px rgba(255, 255, 255, 0.62);
   transform: rotate(8deg);
 }
 
 .role-card[data-card="JOKER"]::after {
   content: "";
-  right: 34px;
-  top: 68px;
-  width: 116px;
-  height: 72px;
-  opacity: 0.28;
+  right: 25px;
+  top: 102px;
+  width: 126px;
+  height: 148px;
+  opacity: 0.32;
   background:
-    radial-gradient(circle at 8% 14%, #ffffff 0 6px, transparent 7px),
-    radial-gradient(circle at 50% 0%, #ffffff 0 6px, transparent 7px),
-    radial-gradient(circle at 92% 14%, #ffffff 0 6px, transparent 7px),
-    linear-gradient(135deg, transparent 0 25%, #ffbe0b 26% 58%, transparent 59%),
-    linear-gradient(45deg, transparent 0 25%, #ffffff 26% 56%, transparent 57%),
-    linear-gradient(90deg, #ffbe0b, #ffffff);
-  clip-path: polygon(0 82%, 16% 22%, 36% 66%, 50% 10%, 64% 66%, 84% 22%, 100% 82%, 100% 100%, 0 100%);
+    radial-gradient(circle at 35% 58%, #ffffff 0 7px, transparent 8px),
+    radial-gradient(circle at 65% 58%, #ffffff 0 7px, transparent 8px),
+    radial-gradient(ellipse at 50% 78%, rgba(255, 255, 255, 0.95) 0 18%, transparent 19%),
+    linear-gradient(90deg, #111827 0 50%, #e60012 50% 100%);
+  clip-path: polygon(50% 0, 61% 34%, 96% 24%, 76% 52%, 92% 82%, 63% 73%, 50% 100%, 37% 73%, 8% 82%, 24% 52%, 4% 24%, 39% 34%);
   box-shadow: none;
   transform: rotate(8deg);
 }
