@@ -118,11 +118,7 @@ function deal(room) {
     player.alive = true;
     player.isJoker = player.id === joker.id;
     player.targetIds = player.isJoker ? targets.map((target) => target.id) : [];
-    player.card = player.isJoker
-      ? "JOKER"
-      : targets.some((target) => target.id === player.id)
-        ? "TARGET"
-        : "PLAYER";
+    player.card = player.isJoker ? "JOKER" : "TARGET";
   });
 }
 

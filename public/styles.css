@@ -107,6 +107,11 @@ button {
   transition: transform 150ms ease, box-shadow 150ms ease, background 150ms ease;
 }
 
+button:disabled {
+  cursor: progress;
+  opacity: 0.78;
+}
+
 button:hover {
   transform: translateY(-1px);
   box-shadow: 0 12px 24px rgba(23, 32, 51, 0.12);
@@ -135,6 +140,31 @@ button.good {
   background: linear-gradient(135deg, var(--green), #3ddc97);
 }
 
+button.leave-room {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--red);
+  background: rgba(255, 255, 255, 0.78);
+}
+
+button.leave-room svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.2;
+}
+
+button.muted {
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.64);
+  box-shadow: none;
+}
+
 input {
   width: 100%;
   min-height: 48px;
@@ -161,10 +191,10 @@ label {
 }
 
 .app {
-  width: min(100%, 560px);
+  width: min(100%, 600px);
   min-height: 100vh;
   margin: 0 auto;
-  padding: max(18px, env(safe-area-inset-top)) 16px 28px;
+  padding: max(18px, env(safe-area-inset-top)) 16px 34px;
 }
 
 .screen {
@@ -181,7 +211,7 @@ label {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 28px 0 12px;
+  padding: 22px 0 10px;
   animation: rise-in 520ms ease both;
 }
 
@@ -211,7 +241,7 @@ p {
 }
 
 h1 {
-  font-size: clamp(2.25rem, 12vw, 4.6rem);
+  font-size: clamp(2.35rem, 12vw, 4.9rem);
   line-height: 0.9;
   color: #18223a;
   text-shadow: 0 3px 0 rgba(255, 255, 255, 0.58);
@@ -230,7 +260,7 @@ h1 {
 .activity {
   border: 1px solid rgba(16, 24, 32, 0.12);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.64);
+  background: rgba(255, 255, 255, 0.72);
   box-shadow: var(--soft-shadow);
   backdrop-filter: blur(18px);
 }
@@ -253,7 +283,7 @@ h1 {
   margin: -18px -16px 0;
   padding: max(14px, env(safe-area-inset-top)) 16px 12px;
   border-bottom: 1px solid rgba(16, 24, 32, 0.1);
-  background: rgba(255, 248, 235, 0.78);
+  background: rgba(255, 248, 235, 0.86);
   backdrop-filter: blur(14px);
 }
 
@@ -268,7 +298,7 @@ h1 {
 
 .code {
   min-height: 34px;
-  padding: 0;
+  padding: 0 2px;
   border: 0;
   color: var(--blue);
   background: transparent;
@@ -289,14 +319,14 @@ h1 {
 
 .card {
   position: relative;
-  min-height: 240px;
-  padding: 22px;
+  min-height: 224px;
+  padding: 20px;
   overflow: hidden;
   border: 0;
   background:
     linear-gradient(135deg, rgba(255, 255, 255, 0.68), rgba(255, 255, 255, 0.18)),
     linear-gradient(135deg, #fff7de 0%, #e9f8ff 100%);
-  box-shadow: var(--shadow);
+  box-shadow: 0 18px 42px rgba(23, 32, 51, 0.14);
   transform-style: preserve-3d;
 }
 
@@ -317,12 +347,6 @@ h1 {
     linear-gradient(135deg, #fff4d6 0%, #ffd6e0 52%, #d8f3ff 100%);
 }
 
-.card[data-card="PLAYER"] {
-  background:
-    radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.55), transparent 28%),
-    linear-gradient(135deg, #e7fff6 0%, #e8f1ff 52%, #fff6d9 100%);
-}
-
 .card::after {
   content: "";
   position: absolute;
@@ -332,9 +356,8 @@ h1 {
   height: 210px;
   border: 2px solid rgba(255, 255, 255, 0.45);
   border-radius: 8px;
-  transform: rotate(14deg);
   background: rgba(255, 255, 255, 0.42);
-  animation: slow-spin 9s ease-in-out infinite;
+  transform: rotate(14deg);
 }
 
 .card::before {
@@ -354,7 +377,7 @@ h1 {
 .card h2 {
   position: relative;
   z-index: 1;
-  margin-top: 18px;
+  margin-top: 14px;
   font-family: Georgia, serif;
   font-size: clamp(2.5rem, 14vw, 5rem);
   line-height: 0.9;
@@ -386,7 +409,6 @@ h1 {
   background: linear-gradient(135deg, var(--red), var(--violet));
   font-weight: 900;
   box-shadow: 0 8px 18px rgba(239, 71, 111, 0.2);
-  animation: pop-in 260ms ease both;
 }
 
 .actions {
@@ -401,7 +423,7 @@ h1 {
 
 .players,
 .activity {
-  padding: 14px;
+  padding: 16px;
 }
 
 .section-title {
@@ -432,12 +454,11 @@ h1 {
   align-items: center;
   gap: 10px;
   min-height: 48px;
-  padding: 10px 12px;
+  padding: 12px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.78);
   box-shadow: 0 5px 14px rgba(23, 32, 51, 0.06);
-  animation: rise-in 280ms ease both;
 }
 
 .player.dead {
@@ -477,6 +498,7 @@ h1 {
   border-color: var(--line);
   margin-top: 8px;
   color: var(--blue);
+  box-shadow: none;
 }
 
 .log-item {
@@ -543,32 +565,12 @@ h1 {
   }
 }
 
-@keyframes slow-spin {
-  0%, 100% {
-    transform: rotate(14deg) translateY(0);
-  }
-  50% {
-    transform: rotate(18deg) translateY(-8px);
-  }
-}
-
 @keyframes heartbeat {
   0%, 100% {
     box-shadow: 0 8px 18px rgba(239, 71, 111, 0.22);
   }
   50% {
     box-shadow: 0 12px 28px rgba(239, 71, 111, 0.38);
-  }
-}
-
-@keyframes pop-in {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
   }
 }
 

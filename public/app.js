@@ -26,7 +26,7 @@ let state = {
   playerId: localStorage.getItem("joker.playerId") || "",
   room: null,
   poll: null,
-  lastCardKey: ""
+  lastDealtCardKey: ""
 };
 
 codeInput.value = state.code;
@@ -158,6 +158,20 @@ function saveSession(code, playerId) {
   startPolling();
 }
 
+function returnToEntry() {
+  if (state.poll) window.clearInterval(state.poll);
+  state.poll = null;
+  state.code = "";
+  state.playerId = "";
+  state.room = null;
+  state.lastDealtCardKey = "";
+  localStorage.removeItem("joker.code");
+  localStorage.removeItem("joker.playerId");
+  codeInput.value = "";
+  entry.classList.remove("hidden");
+  game.classList.add("hidden");
+}
+
 function startPolling() {
   if (state.poll) window.clearInterval(state.poll);
   state.poll = window.setInterval(refreshRoom, 1200);
@@ -187,6 +201,50 @@ async function updateRoom(code, updater) {
   return nextRoom;
 }
 
+async function leaveRoom() {
+  const code = state.code;
+  const playerId = state.playerId;
+  if (!code || !playerId) {
+    returnToEntry();
+    return;
+  }
+
+  try {
+    const room = await getRoom(code);
+    if (!room) {
+      returnToEntry();
+      return;
+    }
+
+    const nextRoom = normalizeRoom(structuredClone(room));
+    const leavingPlayer = nextRoom.players.find((player) => player.id === playerId);
+    nextRoom.players = nextRoom.players.filter((player) => player.id !== playerId);
+    delete nextRoom.votes[playerId];
+    Object.keys(nextRoom.votes).forEach((voterId) => {
+      if (!nextRoom.players.some((player) => player.id === nextRoom.votes[voterId])) {
+        delete nextRoom.votes[voterId];
+      }
+    });
+
+    if (!nextRoom.players.length) {
+      await firebaseFetch(roomUrl(code), { method: "DELETE" });
+      returnToEntry();
+      return;
+    }
+
+    if (nextRoom.hostId === playerId) nextRoom.hostId = nextRoom.players[0].id;
+    if (leavingPlayer) nextRoom.log.push(`${leavingPlayer.name} left the room.`);
+    if (nextRoom.phase === "results") nextRoom.phase = "lobby";
+    await putRoom(nextRoom);
+  } catch (error) {
+    console.error(error);
+    showToast(error.message || "Could not leave room.");
+  } finally {
+    returnToEntry();
+  }
+}
+
+
 function shuffle(items) {
   const result = [...items];
   for (let index = result.length - 1; index > 0; index -= 1) {
@@ -215,11 +273,7 @@ function deal(room) {
     player.alive = true;
     player.isJoker = player.id === joker.id;
     player.targetIds = player.isJoker ? targets.map((target) => target.id) : [];
-    player.card = player.isJoker
-      ? "JOKER"
-      : targets.some((target) => target.id === player.id)
-        ? "TARGET"
-        : "PLAYER";
+    player.card = player.isJoker ? "JOKER" : "TARGET";
   });
 }
 
@@ -296,7 +350,7 @@ function cardCopy(room) {
   if (me.card === "TARGET") {
     return ["TARGET", "The Joker may hint to you. If you catch it, tap Im dead."];
   }
-  return ["PLAYER", "Watch everyone. If people start dying, discuss who the Joker might be."];
+  return ["TARGET", "The Joker may hint to you. If you catch it, tap Im dead."];
 }
 
 function button(label, className, onClick) {
@@ -304,6 +358,25 @@ function button(label, className, onClick) {
   el.textContent = label;
   if (className) el.className = className;
   el.addEventListener("click", onClick);
+  return el;
+}
+
+function leaveRoomButton() {
+  const el = button("", "leave-room", leaveRoom);
+  el.innerHTML = `
+    <svg aria-hidden="true" viewBox="0 0 24 24">
+      <path d="M10 5H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4" />
+      <path d="M15 8l4 4-4 4" />
+      <path d="M8 12h11" />
+    </svg>
+    <span>Leave room</span>
+  `;
+  return el;
+}
+
+function waitingButton(label, message) {
+  const el = button(label, "muted", () => showToast(message));
+  el.type = "button";
   return el;
 }
 
@@ -394,8 +467,11 @@ function renderActions(room) {
           showToast(error.message);
         }
       }));
+      actions.append(leaveRoomButton());
+      return;
     }
-    actions.append(button("Copy invite", "", copyInvite));
+    actions.append(waitingButton("Waiting for host", "The host starts the next round."));
+    actions.append(leaveRoomButton());
   }
 }
 
@@ -522,13 +598,14 @@ function render() {
 
   const [title, text] = cardCopy(room);
   secretCard.dataset.card = room.me?.card || "WAITING";
-  const cardKey = `${room.round}-${room.viewerId}-${room.me?.card || "WAITING"}-${room.phase}`;
-  if (cardKey !== state.lastCardKey) {
+  const cardKey = `${room.round}-${room.viewerId}-${room.me?.card || "WAITING"}`;
+  const shouldAnimateCard = room.me?.card && room.phase === "playing" && cardKey !== state.lastDealtCardKey;
+  if (shouldAnimateCard) {
     secretCard.classList.remove("is-new");
     void secretCard.offsetWidth;
     secretCard.classList.add("is-new");
     window.setTimeout(() => secretCard.classList.remove("is-new"), 650);
-    state.lastCardKey = cardKey;
+    state.lastDealtCardKey = cardKey;
   }
   cardTitle.textContent = title;
   cardText.textContent = text;
