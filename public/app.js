@@ -741,9 +741,31 @@ function renderVoteReveal(room) {
 }
 
 async function copyInvite() {
-  const url = `${location.origin}/?room=${state.code}`;
-  await navigator.clipboard?.writeText(url);
-  showToast("Invite link copied.");
+  if (!state.code) {
+    showToast("Create or join a room first.");
+    return;
+  }
+
+  const url = new URL(location.href);
+  url.searchParams.set("room", state.code);
+  url.hash = "";
+  const inviteLink = url.toString();
+
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(inviteLink);
+  } else {
+    const input = document.createElement("textarea");
+    input.value = inviteLink;
+    input.setAttribute("readonly", "");
+    input.style.position = "fixed";
+    input.style.opacity = "0";
+    document.body.append(input);
+    input.select();
+    document.execCommand("copy");
+    input.remove();
+  }
+
+  showToast("Vercel invite link copied.");
 }
 
 function setBusy(isBusy, buttonEl, busyLabel, normalLabel) {
