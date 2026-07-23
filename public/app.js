@@ -1,3 +1,14 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import {
+  getDatabase,
+  get,
+  onValue,
+  ref,
+  runTransaction,
+  set
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
+import { firebaseConfig } from "./firebase-config.js";
+
 const entry = document.querySelector("#entry");
 const game = document.querySelector("#game");
 const nameInput = document.querySelector("#nameInput");
@@ -16,11 +27,15 @@ const playersList = document.querySelector("#playersList");
 const logList = document.querySelector("#logList");
 const toast = document.querySelector("#toast");
 
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
 let state = {
   code: localStorage.getItem("joker.code") || "",
   playerId: localStorage.getItem("joker.playerId") || "",
   room: null,
-  poll: null,
+  unsubscribeRoom: null,
   lastCardKey: ""
 };
 
@@ -32,25 +47,199 @@ function showToast(message) {
   window.setTimeout(() => toast.classList.add("hidden"), 2100);
 }
 
-async function api(path, body) {
-  const response = await fetch(path, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify(body)
-  });
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.error || "Something went wrong.");
-  return data;
+function makeId() {
+  return crypto.randomUUID();
 }
 
-function saveSession(room, playerId) {
-  state.room = room;
-  state.code = room.code;
+function cleanName(name) {
+  return String(name || "").trim().slice(0, 24);
+}
+
+function cleanCode(code) {
+  return String(code || "").trim().toUpperCase();
+}
+
+function roomCode() {
+  let code = "";
+  const values = new Uint8Array(5);
+  crypto.getRandomValues(values);
+  values.forEach((value) => {
+    code += alphabet[value % alphabet.length];
+  });
+  return code;
+}
+
+function roomRef(code) {
+  return ref(db, `rooms/${code}`);
+}
+
+function normalizeRoom(room) {
+  return {
+    ...room,
+    players: Array.isArray(room?.players) ? room.players : [],
+    votes: room?.votes || {},
+    log: Array.isArray(room?.log) ? room.log : []
+  };
+}
+
+function publicRoom(room, viewerId) {
+  const safeRoom = normalizeRoom(room);
+  const viewer = safeRoom.players.find((player) => player.id === viewerId);
+  return {
+    code: safeRoom.code,
+    hostId: safeRoom.hostId,
+    viewerId,
+    phase: safeRoom.phase,
+    round: safeRoom.round,
+    players: safeRoom.players.map((player) => ({
+      id: player.id,
+      name: player.name,
+      alive: player.alive,
+      isHost: player.id === safeRoom.hostId,
+      isYou: player.id === viewerId,
+      hasVoted: Boolean(safeRoom.votes[player.id]),
+      revealedCard: safeRoom.phase === "results" ? player.card : null,
+      revealedIsJoker: safeRoom.phase === "results" ? player.isJoker : false
+    })),
+    me: viewer ? {
+      id: viewer.id,
+      name: viewer.name,
+      alive: viewer.alive,
+      card: viewer.card,
+      isJoker: viewer.isJoker,
+      targetIds: viewer.targetIds || []
+    } : null,
+    votes: safeRoom.phase === "results" ? safeRoom.votes : {},
+    log: safeRoom.log.slice(-8)
+  };
+}
+
+function saveSession(code, playerId) {
+  state.code = code;
   state.playerId = playerId || state.playerId;
   localStorage.setItem("joker.code", state.code);
   localStorage.setItem("joker.playerId", state.playerId);
-  render();
-  startPolling();
+  watchRoom();
+}
+
+function watchRoom() {
+  if (!state.code || !state.playerId) return;
+  if (state.unsubscribeRoom) state.unsubscribeRoom();
+
+  state.unsubscribeRoom = onValue(roomRef(state.code), (snapshot) => {
+    const rawRoom = snapshot.val();
+    if (!rawRoom) {
+      showToast("Room not found.");
+      return;
+    }
+    state.room = publicRoom(rawRoom, state.playerId);
+    render();
+  }, () => showToast("Could not connect to Firebase."));
+}
+
+async function updateRoom(code, updater) {
+  const result = await runTransaction(roomRef(code), (room) => {
+    if (!room) return room;
+    const nextRoom = normalizeRoom(room);
+    return updater(nextRoom) || nextRoom;
+  });
+
+  if (!result.committed) throw new Error("Room update failed.");
+  return normalizeRoom(result.snapshot.val());
+}
+
+function shuffle(items) {
+  const result = [...items];
+  for (let index = result.length - 1; index > 0; index -= 1) {
+    const swapIndex = crypto.getRandomValues(new Uint32Array(1))[0] % (index + 1);
+    [result[index], result[swapIndex]] = [result[swapIndex], result[index]];
+  }
+  return result;
+}
+
+function deal(room) {
+  const players = room.players;
+  if (players.length < 3) throw new Error("You need at least 3 players.");
+
+  const jokerIndex = crypto.getRandomValues(new Uint32Array(1))[0] % players.length;
+  const joker = players[jokerIndex];
+  const possibleTargets = players.filter((player) => player.id !== joker.id);
+  const targetCount = Math.min(2, Math.max(1, Math.floor(players.length / 3)));
+  const targets = shuffle(possibleTargets).slice(0, targetCount);
+
+  room.phase = "playing";
+  room.round += 1;
+  room.votes = {};
+  room.log = [`Round ${room.round} started. Cards are secret.`];
+
+  players.forEach((player) => {
+    player.alive = true;
+    player.isJoker = player.id === joker.id;
+    player.targetIds = player.isJoker ? targets.map((target) => target.id) : [];
+    player.card = player.isJoker
+      ? "JOKER"
+      : targets.some((target) => target.id === player.id)
+        ? "TARGET"
+        : "PLAYER";
+  });
+}
+
+async function createRoom() {
+  const name = cleanName(nameInput.value);
+  if (!name) throw new Error("Enter your name.");
+
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    const code = roomCode();
+    const playerId = makeId();
+    const room = {
+      code,
+      hostId: playerId,
+      phase: "lobby",
+      round: 0,
+      players: [{
+        id: playerId,
+        name,
+        alive: true,
+        card: null,
+        isJoker: false,
+        targetIds: []
+      }],
+      votes: {},
+      log: []
+    };
+
+    const result = await runTransaction(roomRef(code), (existingRoom) => existingRoom || room);
+    if (result.committed && result.snapshot.val()?.hostId === playerId) {
+      saveSession(code, playerId);
+      return;
+    }
+  }
+
+  throw new Error("Could not create a room. Try again.");
+}
+
+async function joinRoom() {
+  const name = cleanName(nameInput.value);
+  const code = cleanCode(codeInput.value);
+  if (!name) throw new Error("Enter your name.");
+  if (!code) throw new Error("Enter a room code.");
+
+  const playerId = makeId();
+  const result = await runTransaction(roomRef(code), (room) => {
+    if (!room) return room;
+    const nextRoom = normalizeRoom(room);
+    if (nextRoom.phase !== "lobby" || nextRoom.players.length >= 20) return nextRoom;
+    nextRoom.players.push({ id: playerId, name, alive: true, card: null, isJoker: false, targetIds: [] });
+    nextRoom.log.push(`${name} joined.`);
+    return nextRoom;
+  });
+
+  const room = normalizeRoom(result.snapshot.val());
+  if (!room.code) throw new Error("Room not found.");
+  if (!room.players.some((player) => player.id === playerId)) {
+    throw new Error(room.phase !== "lobby" ? "This round already started." : "Room is full.");
+  }
+  saveSession(code, playerId);
 }
 
 function phaseName(phase) {
@@ -92,8 +281,10 @@ function renderActions(room) {
     if (isHost) {
       actions.append(button("Start round", "primary", async () => {
         try {
-          const data = await api("/api/start", { code: room.code, playerId: state.playerId });
-          saveSession(data.room);
+          await updateRoom(room.code, (nextRoom) => {
+            if (nextRoom.hostId !== state.playerId) throw new Error("Only the host can start.");
+            deal(nextRoom);
+          });
         } catch (error) {
           showToast(error.message);
         }
@@ -106,16 +297,27 @@ function renderActions(room) {
   if (room.phase === "playing") {
     actions.append(button("Im dead", "danger", async () => {
       try {
-        const data = await api("/api/dead", { code: room.code, playerId: state.playerId });
-        saveSession(data.room);
+        await updateRoom(room.code, (nextRoom) => {
+          const player = nextRoom.players.find((item) => item.id === state.playerId);
+          if (!player) throw new Error("Player not found.");
+          if (nextRoom.phase !== "playing") throw new Error("The game is not in play.");
+          player.alive = false;
+          nextRoom.log.push(`${player.name} is dead.`);
+        });
       } catch (error) {
         showToast(error.message);
       }
     }));
     if (isHost) {
       actions.append(button("Reveal", "", async () => {
-        const data = await api("/api/reveal", { code: room.code, playerId: state.playerId });
-        saveSession(data.room);
+        try {
+          await updateRoom(room.code, (nextRoom) => {
+            if (nextRoom.hostId !== state.playerId) throw new Error("Only the host can reveal.");
+            nextRoom.phase = "results";
+          });
+        } catch (error) {
+          showToast(error.message);
+        }
       }));
     }
     return;
@@ -125,8 +327,14 @@ function renderActions(room) {
     actions.append(button("Waiting for votes", "", () => showToast("Players can vote from the list.")));
     if (isHost) {
       actions.append(button("Reveal", "primary", async () => {
-        const data = await api("/api/reveal", { code: room.code, playerId: state.playerId });
-        saveSession(data.room);
+        try {
+          await updateRoom(room.code, (nextRoom) => {
+            if (nextRoom.hostId !== state.playerId) throw new Error("Only the host can reveal.");
+            nextRoom.phase = "results";
+          });
+        } catch (error) {
+          showToast(error.message);
+        }
       }));
     }
     return;
@@ -135,8 +343,22 @@ function renderActions(room) {
   if (room.phase === "results") {
     if (isHost) {
       actions.append(button("Next round", "good", async () => {
-        const data = await api("/api/reset", { code: room.code, playerId: state.playerId });
-        saveSession(data.room);
+        try {
+          await updateRoom(room.code, (nextRoom) => {
+            if (nextRoom.hostId !== state.playerId) throw new Error("Only the host can reset.");
+            nextRoom.phase = "lobby";
+            nextRoom.votes = {};
+            nextRoom.log = ["Back in the lobby."];
+            nextRoom.players.forEach((player) => {
+              player.alive = true;
+              player.card = null;
+              player.isJoker = false;
+              player.targetIds = [];
+            });
+          });
+        } catch (error) {
+          showToast(error.message);
+        }
       }));
     }
     actions.append(button("Copy invite", "", copyInvite));
@@ -163,8 +385,12 @@ function renderPlayers(room) {
       vote.textContent = `Vote ${player.name}`;
       vote.addEventListener("click", async () => {
         try {
-          const data = await api("/api/vote", { code: room.code, playerId: state.playerId, targetId: player.id });
-          saveSession(data.room);
+          await updateRoom(room.code, (nextRoom) => {
+            if (!nextRoom.players.some((item) => item.id === player.id)) throw new Error("Choose a player.");
+            nextRoom.votes[state.playerId] = player.id;
+            nextRoom.phase = "voting";
+            if (Object.keys(nextRoom.votes).length >= nextRoom.players.length) nextRoom.phase = "results";
+          });
         } catch (error) {
           showToast(error.message);
         }
@@ -285,27 +511,9 @@ async function copyInvite() {
   showToast("Invite link copied.");
 }
 
-function startPolling() {
-  if (state.poll) return;
-  state.poll = window.setInterval(async () => {
-    if (!state.code || !state.playerId) return;
-    try {
-      const response = await fetch(`/api/room?code=${encodeURIComponent(state.code)}&playerId=${encodeURIComponent(state.playerId)}`);
-      const data = await response.json();
-      if (response.ok) {
-        state.room = data.room;
-        render();
-      }
-    } catch {
-      // The next poll will try again.
-    }
-  }, 1200);
-}
-
 createBtn.addEventListener("click", async () => {
   try {
-    const data = await api("/api/create", { name: nameInput.value });
-    saveSession(data.room, data.playerId);
+    await createRoom();
   } catch (error) {
     showToast(error.message);
   }
@@ -313,8 +521,7 @@ createBtn.addEventListener("click", async () => {
 
 joinBtn.addEventListener("click", async () => {
   try {
-    const data = await api("/api/join", { name: nameInput.value, code: codeInput.value });
-    saveSession(data.room, data.playerId);
+    await joinRoom();
   } catch (error) {
     showToast(error.message);
   }
@@ -326,10 +533,7 @@ const roomFromUrl = new URLSearchParams(location.search).get("room");
 if (roomFromUrl) codeInput.value = roomFromUrl.toUpperCase();
 
 if (state.code && state.playerId) {
-  fetch(`/api/room?code=${encodeURIComponent(state.code)}&playerId=${encodeURIComponent(state.playerId)}`)
-    .then((response) => response.json().then((data) => ({ response, data })))
-    .then(({ response, data }) => {
-      if (response.ok && data.room.me) saveSession(data.room);
-    })
-    .catch(() => {});
+  const snapshot = await get(roomRef(state.code));
+  const room = snapshot.val();
+  if (room?.players?.some((player) => player.id === state.playerId)) watchRoom();
 }

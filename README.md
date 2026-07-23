@@ -2,7 +2,15 @@
 
 A mobile-friendly party card game where players join a room, receive secret cards, and try to find the Joker.
 
-## Run locally
+## Firebase Setup
+
+1. Create a Firebase project.
+2. Add a Web App in Firebase project settings.
+3. Create a Realtime Database.
+4. Copy your Firebase Web App config into `public/firebase-config.js`.
+5. Add the rules from `database.rules.json` to Realtime Database Rules.
+
+## Run Locally
 
 ```bash
 npm start
@@ -10,17 +18,14 @@ npm start
 
 Then open `http://localhost:4173`.
 
-## Deploy on Cloudflare
+## Deploy on Vercel
 
-- Create a free Cloudflare account.
-- Install dependencies with `npm install`.
-- Log in with `npx wrangler login`.
-- Deploy with `npm run deploy`.
-
-Cloudflare will give you a public URL like:
+Use the GitHub repo in Vercel.
 
 ```text
-https://joker-hint.your-name.workers.dev
+Framework Preset: Other
+Build Command: npm run build
+Output Directory: dist
 ```
 
-The deployed version uses a Cloudflare Worker plus Durable Objects for game rooms.
+Vercel will host the static game. Firebase Realtime Database stores rooms, players, cards, and votes.
