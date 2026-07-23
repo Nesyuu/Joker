@@ -168,8 +168,20 @@ function returnToEntry() {
   localStorage.removeItem("joker.code");
   localStorage.removeItem("joker.playerId");
   codeInput.value = "";
+  copyCodeBtn.textContent = "-----";
+  phaseLabel.textContent = "Lobby";
+  secretCard.dataset.card = "WAITING";
+  secretCard.classList.remove("is-new");
+  cardTitle.textContent = "Waiting";
+  cardText.textContent = "Create or join a room to begin.";
+  targetList.innerHTML = "";
+  actions.innerHTML = "";
+  playersList.innerHTML = "";
+  logList.innerHTML = "";
+  playerCount.textContent = "0";
   entry.classList.remove("hidden");
   game.classList.add("hidden");
+  window.setTimeout(() => nameInput.focus(), 50);
 }
 
 function startPolling() {
