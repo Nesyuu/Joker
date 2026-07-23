@@ -621,6 +621,8 @@ h1 {
 }
 
 .role-card {
+  position: relative;
+  overflow: hidden;
   display: grid;
   width: min(88vw, 370px);
   min-height: 430px;
@@ -641,6 +643,37 @@ h1 {
   animation: role-card-in 380ms cubic-bezier(.2, .8, .2, 1) both;
 }
 
+.role-card::before {
+  content: "";
+  position: absolute;
+  right: -22px;
+  top: 78px;
+  z-index: 0;
+  width: 154px;
+  height: 154px;
+  border-radius: 50%;
+  opacity: 0.22;
+  background:
+    radial-gradient(circle, var(--red) 0 9%, #ffffff 10% 20%, #172033 21% 31%, #ffffff 32% 44%, #172033 45% 58%, transparent 59%),
+    linear-gradient(45deg, transparent 48%, #172033 49% 53%, transparent 54%);
+  transform: rotate(-18deg);
+}
+
+.role-card::after {
+  content: "";
+  position: absolute;
+  right: 72px;
+  top: 118px;
+  z-index: 0;
+  width: 74px;
+  height: 12px;
+  border-radius: 999px;
+  opacity: 0.24;
+  background: #172033;
+  box-shadow: 32px -10px 0 -2px var(--red);
+  transform: rotate(-18deg);
+}
+
 .role-card[data-card="JOKER"] {
   color: #ffffff;
   background:
@@ -648,13 +681,55 @@ h1 {
     linear-gradient(135deg, #2b174f 0%, #ef476f 52%, #ffbe0b 100%);
 }
 
+.role-card[data-card="JOKER"]::before {
+  content: "J";
+  right: -2px;
+  top: 82px;
+  display: grid;
+  place-items: center;
+  width: 138px;
+  height: 178px;
+  border-radius: 0;
+  color: rgba(255, 255, 255, 0.24);
+  background: transparent;
+  font-family: Georgia, serif;
+  font-size: 10.5rem;
+  font-weight: 900;
+  line-height: 1;
+  opacity: 1;
+  transform: rotate(8deg);
+}
+
+.role-card[data-card="JOKER"]::after {
+  content: "";
+  right: 34px;
+  top: 68px;
+  width: 116px;
+  height: 72px;
+  opacity: 0.28;
+  background:
+    radial-gradient(circle at 8% 14%, #ffffff 0 6px, transparent 7px),
+    radial-gradient(circle at 50% 0%, #ffffff 0 6px, transparent 7px),
+    radial-gradient(circle at 92% 14%, #ffffff 0 6px, transparent 7px),
+    linear-gradient(135deg, transparent 0 25%, #ffbe0b 26% 58%, transparent 59%),
+    linear-gradient(45deg, transparent 0 25%, #ffffff 26% 56%, transparent 57%),
+    linear-gradient(90deg, #ffbe0b, #ffffff);
+  clip-path: polygon(0 82%, 16% 22%, 36% 66%, 50% 10%, 64% 66%, 84% 22%, 100% 82%, 100% 100%, 0 100%);
+  box-shadow: none;
+  transform: rotate(8deg);
+}
+
 .role-card .caption {
+  position: relative;
+  z-index: 1;
   align-self: start;
   color: currentColor;
   opacity: 0.72;
 }
 
 .role-card strong {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -673,6 +748,8 @@ h1 {
 }
 
 .role-card small {
+  position: relative;
+  z-index: 1;
   align-self: end;
   max-width: 260px;
   color: currentColor;
