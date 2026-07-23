@@ -1,12 +1,3 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-import {
-  getDatabase,
-  get,
-  onValue,
-  ref,
-  runTransaction,
-  set
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
 import { firebaseConfig } from "./firebase-config.js";
 
 const entry = document.querySelector("#entry");
@@ -27,15 +18,14 @@ const playersList = document.querySelector("#playersList");
 const logList = document.querySelector("#logList");
 const toast = document.querySelector("#toast");
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
 const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+const databaseURL = String(firebaseConfig.databaseURL || "").replace(/\/$/, "");
 
 let state = {
   code: localStorage.getItem("joker.code") || "",
   playerId: localStorage.getItem("joker.playerId") || "",
   room: null,
-  unsubscribeRoom: null,
+  poll: null,
   lastCardKey: ""
 };
 
@@ -44,7 +34,7 @@ codeInput.value = state.code;
 function showToast(message) {
   toast.textContent = message;
   toast.classList.remove("hidden");
-  window.setTimeout(() => toast.classList.add("hidden"), 2100);
+  window.setTimeout(() => toast.classList.add("hidden"), 5200);
 }
 
 function makeId() {
@@ -69,16 +59,62 @@ function roomCode() {
   return code;
 }
 
-function roomRef(code) {
-  return ref(db, `rooms/${code}`);
+function roomUrl(code) {
+  if (!databaseURL || databaseURL.includes("PASTE_")) {
+    throw new Error("Firebase database URL is missing.");
+  }
+  return `${databaseURL}/rooms/${encodeURIComponent(code)}.json`;
+}
+
+async function firebaseFetch(url, options = {}) {
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 9000);
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+      headers: {
+        "content-type": "application/json",
+        ...(options.headers || {})
+      }
+    });
+    const text = await response.text();
+    const data = text ? JSON.parse(text) : null;
+    if (!response.ok) {
+      const message = data?.error || `Firebase error ${response.status}`;
+      throw new Error(message);
+    }
+    return data;
+  } catch (error) {
+    if (error.name === "AbortError") {
+      throw new Error("Firebase did not answer. Check database URL and rules.");
+    }
+    throw error;
+  } finally {
+    window.clearTimeout(timeout);
+  }
+}
+
+async function getRoom(code) {
+  return normalizeRoom(await firebaseFetch(roomUrl(code)));
+}
+
+async function putRoom(room) {
+  await firebaseFetch(roomUrl(room.code), {
+    method: "PUT",
+    body: JSON.stringify(room)
+  });
+  return room;
 }
 
 function normalizeRoom(room) {
+  if (!room) return null;
   return {
     ...room,
-    players: Array.isArray(room?.players) ? room.players : [],
-    votes: room?.votes || {},
-    log: Array.isArray(room?.log) ? room.log : []
+    players: Array.isArray(room.players) ? room.players : [],
+    votes: room.votes || {},
+    log: Array.isArray(room.log) ? room.log : []
   };
 }
 
@@ -119,33 +155,36 @@ function saveSession(code, playerId) {
   state.playerId = playerId || state.playerId;
   localStorage.setItem("joker.code", state.code);
   localStorage.setItem("joker.playerId", state.playerId);
-  watchRoom();
+  startPolling();
 }
 
-function watchRoom() {
-  if (!state.code || !state.playerId) return;
-  if (state.unsubscribeRoom) state.unsubscribeRoom();
+function startPolling() {
+  if (state.poll) window.clearInterval(state.poll);
+  state.poll = window.setInterval(refreshRoom, 1200);
+  refreshRoom();
+}
 
-  state.unsubscribeRoom = onValue(roomRef(state.code), (snapshot) => {
-    const rawRoom = snapshot.val();
-    if (!rawRoom) {
-      showToast("Room not found.");
-      return;
-    }
-    state.room = publicRoom(rawRoom, state.playerId);
+async function refreshRoom() {
+  if (!state.code || !state.playerId) return;
+  try {
+    const room = await getRoom(state.code);
+    if (!room) return;
+    state.room = publicRoom(room, state.playerId);
     render();
-  }, () => showToast("Could not connect to Firebase."));
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 async function updateRoom(code, updater) {
-  const result = await runTransaction(roomRef(code), (room) => {
-    if (!room) return room;
-    const nextRoom = normalizeRoom(room);
-    return updater(nextRoom) || nextRoom;
-  });
-
-  if (!result.committed) throw new Error("Room update failed.");
-  return normalizeRoom(result.snapshot.val());
+  const room = await getRoom(code);
+  if (!room) throw new Error("Room not found.");
+  const nextRoom = normalizeRoom(structuredClone(room));
+  updater(nextRoom);
+  await putRoom(nextRoom);
+  state.room = publicRoom(nextRoom, state.playerId);
+  render();
+  return nextRoom;
 }
 
 function shuffle(items) {
@@ -190,6 +229,9 @@ async function createRoom() {
 
   for (let attempt = 0; attempt < 8; attempt += 1) {
     const code = roomCode();
+    const existingRoom = await getRoom(code);
+    if (existingRoom) continue;
+
     const playerId = makeId();
     const room = {
       code,
@@ -208,11 +250,9 @@ async function createRoom() {
       log: []
     };
 
-    const result = await runTransaction(roomRef(code), (existingRoom) => existingRoom || room);
-    if (result.committed && result.snapshot.val()?.hostId === playerId) {
-      saveSession(code, playerId);
-      return;
-    }
+    await putRoom(room);
+    saveSession(code, playerId);
+    return;
   }
 
   throw new Error("Could not create a room. Try again.");
@@ -225,20 +265,14 @@ async function joinRoom() {
   if (!code) throw new Error("Enter a room code.");
 
   const playerId = makeId();
-  const result = await runTransaction(roomRef(code), (room) => {
-    if (!room) return room;
-    const nextRoom = normalizeRoom(room);
-    if (nextRoom.phase !== "lobby" || nextRoom.players.length >= 20) return nextRoom;
+  const room = await updateRoom(code, (nextRoom) => {
+    if (nextRoom.phase !== "lobby") throw new Error("This round already started.");
+    if (nextRoom.players.length >= 20) throw new Error("Room is full.");
     nextRoom.players.push({ id: playerId, name, alive: true, card: null, isJoker: false, targetIds: [] });
     nextRoom.log.push(`${name} joined.`);
-    return nextRoom;
   });
 
-  const room = normalizeRoom(result.snapshot.val());
-  if (!room.code) throw new Error("Room not found.");
-  if (!room.players.some((player) => player.id === playerId)) {
-    throw new Error(room.phase !== "lobby" ? "This round already started." : "Room is full.");
-  }
+  if (!room.players.some((player) => player.id === playerId)) throw new Error("Could not join room.");
   saveSession(code, playerId);
 }
 
@@ -511,19 +545,37 @@ async function copyInvite() {
   showToast("Invite link copied.");
 }
 
+function setBusy(isBusy, buttonEl, busyLabel, normalLabel) {
+  createBtn.disabled = isBusy;
+  joinBtn.disabled = isBusy;
+  buttonEl.textContent = isBusy ? busyLabel : normalLabel;
+  if (!isBusy) {
+    createBtn.textContent = "Create room";
+    joinBtn.textContent = "Join room";
+  }
+}
+
 createBtn.addEventListener("click", async () => {
+  setBusy(true, createBtn, "Creating...", "Create room");
   try {
     await createRoom();
   } catch (error) {
-    showToast(error.message);
+    console.error(error);
+    showToast(error.message || "Could not create room.");
+  } finally {
+    setBusy(false, createBtn, "Creating...", "Create room");
   }
 });
 
 joinBtn.addEventListener("click", async () => {
+  setBusy(true, joinBtn, "Joining...", "Join room");
   try {
     await joinRoom();
   } catch (error) {
-    showToast(error.message);
+    console.error(error);
+    showToast(error.message || "Could not join room.");
+  } finally {
+    setBusy(false, joinBtn, "Joining...", "Join room");
   }
 });
 
@@ -532,8 +584,4 @@ copyCodeBtn.addEventListener("click", copyInvite);
 const roomFromUrl = new URLSearchParams(location.search).get("room");
 if (roomFromUrl) codeInput.value = roomFromUrl.toUpperCase();
 
-if (state.code && state.playerId) {
-  const snapshot = await get(roomRef(state.code));
-  const room = snapshot.val();
-  if (room?.players?.some((player) => player.id === state.playerId)) watchRoom();
-}
+if (state.code && state.playerId) startPolling();
