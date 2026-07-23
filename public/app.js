@@ -20,6 +20,7 @@ const toast = document.querySelector("#toast");
 
 const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const databaseURL = String(firebaseConfig.databaseURL || "").replace(/\/$/, "");
+const testRoomCode = "TESTING";
 
 let state = {
   code: localStorage.getItem("joker.code") || "",
@@ -268,7 +269,8 @@ function shuffle(items) {
 
 function deal(room) {
   const players = room.players;
-  if (players.length < 3) throw new Error("You need at least 3 players.");
+  const isTestingRoom = cleanCode(room.code) === testRoomCode;
+  if (!isTestingRoom && players.length < 3) throw new Error("You need at least 3 players.");
 
   const jokerIndex = crypto.getRandomValues(new Uint32Array(1))[0] % players.length;
   const joker = players[jokerIndex];
@@ -331,6 +333,24 @@ async function joinRoom() {
   if (!code) throw new Error("Enter a room code.");
 
   const playerId = makeId();
+  if (code === testRoomCode) {
+    const existingRoom = await getRoom(code);
+    if (!existingRoom) {
+      const room = {
+        code,
+        hostId: playerId,
+        phase: "lobby",
+        round: 0,
+        players: [{ id: playerId, name, alive: true, card: null, isJoker: false, targetIds: [] }],
+        votes: {},
+        log: ["Secret testing room created."]
+      };
+      await putRoom(room);
+      saveSession(code, playerId);
+      return;
+    }
+  }
+
   const room = await updateRoom(code, (nextRoom) => {
     if (nextRoom.phase !== "lobby") throw new Error("This round already started.");
     if (nextRoom.players.length >= 20) throw new Error("Room is full.");
