@@ -123,6 +123,11 @@ function deal(room) {
   });
 }
 
+function shouldOpenVoting(room) {
+  const aliveTargets = room.players.filter((player) => !player.isJoker && player.alive);
+  return room.phase === "playing" && aliveTargets.length === 1;
+}
+
 function serveStatic(req, res) {
   const url = new URL(req.url, `http://${req.headers.host}`);
   const filePath = path.normalize(path.join(PUBLIC_DIR, url.pathname === "/" ? "index.html" : url.pathname));
@@ -207,6 +212,10 @@ const server = http.createServer(async (req, res) => {
       if (room.phase !== "playing") return sendJson(res, 400, { error: "The game is not in play." });
       player.alive = false;
       room.log.push(`${player.name} is dead.`);
+      if (shouldOpenVoting(room)) {
+        room.phase = "voting";
+        room.log.push("Only one target is left. Voting started.");
+      }
       return sendJson(res, 200, { room: publicRoom(room, body.playerId) });
     }
 
@@ -217,8 +226,8 @@ const server = http.createServer(async (req, res) => {
       if (!room.players.some((player) => player.id === body.targetId)) {
         return sendJson(res, 400, { error: "Choose a player." });
       }
+      if (room.phase !== "voting") return sendJson(res, 400, { error: "Voting is not open yet." });
       room.votes[body.playerId] = body.targetId;
-      room.phase = "voting";
       if (Object.keys(room.votes).length >= room.players.length) room.phase = "results";
       return sendJson(res, 200, { room: publicRoom(room, body.playerId) });
     }

@@ -293,6 +293,11 @@ function deal(room) {
   });
 }
 
+function shouldOpenVoting(room) {
+  const aliveTargets = room.players.filter((player) => !player.isJoker && player.alive);
+  return room.phase === "playing" && aliveTargets.length === 1;
+}
+
 async function createRoom() {
   const name = cleanName(nameInput.value);
   if (!name) throw new Error("Enter your name.");
@@ -444,6 +449,10 @@ function renderActions(room) {
           if (nextRoom.phase !== "playing") throw new Error("The game is not in play.");
           player.alive = false;
           nextRoom.log.push(`${player.name} is dead.`);
+          if (shouldOpenVoting(nextRoom)) {
+            nextRoom.phase = "voting";
+            nextRoom.log.push("Only one target is left. Voting started.");
+          }
         });
       } catch (error) {
         showToast(error.message);
@@ -510,7 +519,7 @@ function renderActions(room) {
 function renderPlayers(room) {
   playersList.innerHTML = "";
   playerCount.textContent = String(room.players.length);
-  const canVote = room.phase === "playing" || room.phase === "voting";
+  const canVote = room.phase === "voting";
 
   room.players.forEach((player) => {
     const row = document.createElement("div");
@@ -529,8 +538,8 @@ function renderPlayers(room) {
         try {
           await updateRoom(room.code, (nextRoom) => {
             if (!nextRoom.players.some((item) => item.id === player.id)) throw new Error("Choose a player.");
+            if (nextRoom.phase !== "voting") throw new Error("Voting is not open yet.");
             nextRoom.votes[state.playerId] = player.id;
-            nextRoom.phase = "voting";
             if (Object.keys(nextRoom.votes).length >= nextRoom.players.length) nextRoom.phase = "results";
           });
         } catch (error) {
