@@ -684,42 +684,42 @@ h1 {
   border: 10px solid #f4ead6;
   color: #f4ead6;
   background:
-    linear-gradient(#9d1414, #9d1414) 26px 26px / calc(100% - 52px) 2px no-repeat,
-    linear-gradient(#9d1414, #9d1414) 26px calc(100% - 26px) / calc(100% - 52px) 2px no-repeat,
-    linear-gradient(90deg, #9d1414, #9d1414) 26px 26px / 2px calc(100% - 52px) no-repeat,
-    linear-gradient(90deg, #9d1414, #9d1414) calc(100% - 26px) 26px / 2px calc(100% - 52px) no-repeat,
-    radial-gradient(circle at 50% 26%, rgba(230, 0, 18, 0.32), transparent 30%),
-    radial-gradient(circle at 50% 26%, rgba(244, 234, 214, 0.08), transparent 18%),
-    linear-gradient(135deg, #101010 0%, #171717 54%, #0b0b0b 100%);
-  box-shadow: 0 30px 74px rgba(0, 0, 0, 0.42);
+    linear-gradient(#c29a4a, #c29a4a) 26px 26px / calc(100% - 52px) 2px no-repeat,
+    linear-gradient(#c29a4a, #c29a4a) 26px calc(100% - 26px) / calc(100% - 52px) 2px no-repeat,
+    linear-gradient(90deg, #c29a4a, #c29a4a) 26px 26px / 2px calc(100% - 52px) no-repeat,
+    linear-gradient(90deg, #c29a4a, #c29a4a) calc(100% - 26px) 26px / 2px calc(100% - 52px) no-repeat,
+    radial-gradient(circle at 50% 25%, rgba(66, 122, 209, 0.3), transparent 28%),
+    radial-gradient(circle at 50% 26%, rgba(244, 234, 214, 0.1), transparent 18%),
+    linear-gradient(135deg, #071a36 0%, #0d2c5a 54%, #061326 100%);
+  box-shadow: 0 30px 74px rgba(0, 18, 46, 0.46);
 }
 
 .role-card[data-card="TARGET"]::before {
   left: 50%;
   right: auto;
-  top: 78px;
+  top: 76px;
   width: 226px;
   height: 226px;
-  opacity: 0.88;
+  opacity: 0.9;
   background:
-    radial-gradient(circle, #e60012 0 13%, #f4ead6 14% 26%, #111111 27% 42%, #f4ead6 43% 55%, #e60012 56% 72%, transparent 73%),
-    conic-gradient(from 45deg, transparent 0 8%, #e60012 8% 11%, transparent 11% 25%, #f4ead6 25% 28%, transparent 28% 50%, #e60012 50% 53%, transparent 53% 75%, #f4ead6 75% 78%, transparent 78% 100%);
+    radial-gradient(circle, #0d2c5a 0 15%, #f4ead6 16% 29%, #0d2c5a 30% 44%, #f4ead6 45% 58%, #16457f 59% 72%, transparent 73%),
+    conic-gradient(from 45deg, transparent 0 8%, #f4ead6 8% 11%, transparent 11% 25%, #c29a4a 25% 28%, transparent 28% 50%, #f4ead6 50% 53%, transparent 53% 75%, #c29a4a 75% 78%, transparent 78% 100%);
   box-shadow:
-    inset 0 0 0 8px rgba(17, 17, 17, 0.72),
-    0 0 0 30px rgba(157, 20, 20, 0.45);
+    inset 0 0 0 8px rgba(194, 154, 74, 0.62),
+    0 0 0 30px rgba(22, 69, 127, 0.46);
   transform: translateX(-50%) rotate(0);
 }
 
 .role-card[data-card="TARGET"]::after {
   left: 50%;
   right: auto;
-  top: 50px;
-  width: 64px;
-  height: 284px;
-  opacity: 0.82;
-  background: #e60012;
+  top: 48px;
+  width: 62px;
+  height: 286px;
+  opacity: 0.9;
+  background: #f4ead6;
   clip-path: polygon(50% 0, 65% 39%, 100% 50%, 65% 61%, 50% 100%, 35% 61%, 0 50%, 35% 39%);
-  box-shadow: none;
+  box-shadow: 0 0 0 2px rgba(194, 154, 74, 0.65);
   transform: translateX(-50%);
 }
 
@@ -727,8 +727,8 @@ h1 {
   width: min(88vw, 390px);
   min-height: min(86vh, 590px);
   grid-template-rows: 1fr auto auto;
-  gap: 8px;
-  padding: 30px 30px 36px;
+  gap: 10px;
+  padding: 30px 34px 36px;
   border: 10px solid #f4ead6;
   color: #f4ead6;
   background:
@@ -746,9 +746,9 @@ h1 {
   content: "";
   left: 50%;
   right: auto;
-  top: 76px;
-  width: 214px;
-  height: 214px;
+  top: 70px;
+  width: 194px;
+  height: 194px;
   border-radius: 50%;
   opacity: 0.82;
   background:
@@ -766,9 +766,9 @@ h1 {
   content: "";
   left: 50%;
   right: auto;
-  top: 114px;
-  width: 132px;
-  height: 154px;
+  top: 104px;
+  width: 120px;
+  height: 140px;
   opacity: 0.94;
   background:
     radial-gradient(circle at 35% 58%, #f4ead6 0 7px, transparent 8px),
@@ -811,13 +811,13 @@ h1 {
 .role-card[data-card="JOKER"] .caption {
   align-self: end;
   justify-self: center;
-  margin-top: 280px;
+  margin-top: 254px;
   border: 0;
   color: #f4ead6;
   background: transparent;
   box-shadow: none;
   font-family: Georgia, serif;
-  font-size: clamp(1.4rem, 7vw, 2.1rem);
+  font-size: clamp(1.22rem, 5.8vw, 1.85rem);
   opacity: 1;
 }
 
@@ -841,7 +841,7 @@ h1 {
   font-size: clamp(3.55rem, 16vw, 5.4rem);
   font-style: italic;
   line-height: 0.9;
-  text-shadow: 0 4px 0 rgba(230, 0, 18, 0.54);
+  text-shadow: 0 4px 0 rgba(194, 154, 74, 0.5);
   transform: skewX(-8deg);
 }
 
@@ -852,10 +852,11 @@ h1 {
 
 .role-card[data-card="JOKER"] strong {
   min-height: 0;
+  max-width: 100%;
   color: #f4ead6;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(4.1rem, 19vw, 6.3rem);
-  line-height: 0.82;
+  font-size: clamp(3.35rem, 16vw, 5.25rem);
+  line-height: 0.88;
   text-shadow: 0 4px 0 rgba(230, 0, 18, 0.52);
   transform: translateY(0);
 }
