@@ -21,7 +21,7 @@ const toast = document.querySelector("#toast");
 
 const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const databaseURL = String(firebaseConfig.databaseURL || "").replace(/\/$/, "");
-const testRoomCode = "TESTING";
+const testRoomCode = "TESST";
 
 let state = {
   code: localStorage.getItem("joker.code") || "",
@@ -345,7 +345,7 @@ async function joinRoom() {
         round: 0,
         players: [{ id: playerId, name, alive: true, card: null, isJoker: false, targetIds: [] }],
         votes: {},
-        log: ["Secret testing room created."]
+        log: ["Secret test room created."]
       };
       await putRoom(room);
       saveSession(code, playerId);

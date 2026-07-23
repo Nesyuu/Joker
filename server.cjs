@@ -5,7 +5,7 @@ const crypto = require("crypto");
 
 const PORT = process.env.PORT || 4173;
 const PUBLIC_DIR = path.join(__dirname, "public");
-const TEST_ROOM_CODE = "TESTING";
+const TEST_ROOM_CODE = "TESST";
 
 const rooms = new Map();
 
