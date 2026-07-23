@@ -646,32 +646,33 @@ h1 {
 .role-card::before {
   content: "";
   position: absolute;
-  right: -22px;
-  top: 78px;
+  right: -34px;
+  top: 76px;
   z-index: 0;
-  width: 154px;
-  height: 154px;
+  width: 188px;
+  height: 188px;
   border-radius: 50%;
-  opacity: 0.22;
+  opacity: 0.2;
   background:
-    radial-gradient(circle, var(--red) 0 9%, #ffffff 10% 20%, #172033 21% 31%, #ffffff 32% 44%, #172033 45% 58%, transparent 59%),
-    linear-gradient(45deg, transparent 48%, #172033 49% 53%, transparent 54%);
-  transform: rotate(-18deg);
+    radial-gradient(circle, #e60012 0 13%, #ffffff 14% 26%, #111827 27% 42%, #ffffff 43% 55%, #e60012 56% 72%, transparent 73%),
+    conic-gradient(from 45deg, transparent 0 8%, #e60012 8% 11%, transparent 11% 25%, #111827 25% 28%, transparent 28% 50%, #e60012 50% 53%, transparent 53% 75%, #111827 75% 78%, transparent 78% 100%);
+  box-shadow: 0 0 0 22px rgba(230, 0, 18, 0.07);
+  transform: rotate(4deg);
 }
 
 .role-card::after {
   content: "";
   position: absolute;
-  right: 72px;
-  top: 118px;
+  right: 33px;
+  top: 46px;
   z-index: 0;
-  width: 74px;
-  height: 12px;
-  border-radius: 999px;
-  opacity: 0.24;
-  background: #172033;
-  box-shadow: 32px -10px 0 -2px var(--red);
-  transform: rotate(-18deg);
+  width: 54px;
+  height: 250px;
+  opacity: 0.19;
+  background: #e60012;
+  clip-path: polygon(50% 0, 66% 39%, 100% 50%, 66% 61%, 50% 100%, 34% 61%, 0 50%, 34% 39%);
+  box-shadow: none;
+  transform: rotate(4deg);
 }
 
 .role-card[data-card="JOKER"] {
