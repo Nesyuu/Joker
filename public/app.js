@@ -27,6 +27,7 @@ const toast = document.querySelector("#toast");
 
 const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const databaseURL = String(firebaseConfig.databaseURL || "").replace(/\/$/, "");
+const inviteBaseURL = String(firebaseConfig.inviteBaseURL || "").replace(/\/$/, "");
 const testRoomCode = "TESST";
 
 let state = {
@@ -746,9 +747,9 @@ async function copyInvite() {
     return;
   }
 
-  const url = new URL(location.href);
+  const baseURL = inviteBaseURL || location.origin;
+  const url = new URL(baseURL);
   url.searchParams.set("room", state.code);
-  url.hash = "";
   const inviteLink = url.toString();
 
   if (navigator.clipboard?.writeText) {
