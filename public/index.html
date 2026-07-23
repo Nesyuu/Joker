@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Joker Hint</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <div class="table-scene" aria-hidden="true">
+      <span class="floating-card card-one">J</span>
+      <span class="floating-card card-two">?</span>
+      <span class="floating-card card-three">K</span>
+    </div>
+    <main class="app">
+      <section id="entry" class="screen">
+        <div class="brand">
+          <span class="mark">J</span>
+          <div>
+            <h1>Joker Hint</h1>
+            <p>A fast party game of secret signals, quick reads, and one smiling Joker.</p>
+          </div>
+        </div>
+
+        <div class="panel">
+          <label>
+            Your name
+            <input id="nameInput" maxlength="24" autocomplete="name" placeholder="Younes">
+          </label>
+          <button id="createBtn" class="primary">Create room</button>
+        </div>
+
+        <div class="panel">
+          <label>
+            Room code
+            <input id="codeInput" maxlength="5" autocapitalize="characters" placeholder="A7K2Q">
+          </label>
+          <button id="joinBtn">Join room</button>
+        </div>
+      </section>
+
+      <section id="game" class="screen hidden">
+        <header class="topbar">
+          <div>
+            <span class="caption">Room</span>
+            <button id="copyCodeBtn" class="code" title="Copy room code">-----</button>
+          </div>
+          <div class="status" id="phaseLabel">Lobby</div>
+        </header>
+
+        <section class="card" id="secretCard">
+          <span class="caption">Your card</span>
+          <h2 id="cardTitle">Waiting</h2>
+          <p id="cardText">Create or join a room to begin.</p>
+          <div id="targetList" class="targets"></div>
+        </section>
+
+        <section class="actions" id="actions"></section>
+
+        <section class="players">
+          <div class="section-title">
+            <h2>Players</h2>
+            <span id="playerCount">0</span>
+          </div>
+          <div id="playersList" class="player-list"></div>
+        </section>
+
+        <section class="activity">
+          <div class="section-title">
+            <h2>Activity</h2>
+          </div>
+          <div id="logList" class="log-list"></div>
+        </section>
+      </section>
+
+      <div id="toast" class="toast hidden"></div>
+    </main>
+    <script src="/app.js"></script>
+  </body>
+</html>

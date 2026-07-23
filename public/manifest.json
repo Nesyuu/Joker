@@ -1,0 +1,9 @@
+{
+  "name": "Joker Hint",
+  "short_name": "Joker Hint",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f6f1e8",
+  "theme_color": "#101820",
+  "icons": []
+}
