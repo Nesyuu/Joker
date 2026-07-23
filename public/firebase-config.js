@@ -1,9 +1,10 @@
 export const firebaseConfig = {
-  apiKey: "PASTE_FIREBASE_API_KEY",
-  authDomain: "PASTE_PROJECT_ID.firebaseapp.com",
-  databaseURL: "https://PASTE_PROJECT_ID-default-rtdb.firebaseio.com",
-  projectId: "PASTE_PROJECT_ID",
-  storageBucket: "PASTE_PROJECT_ID.appspot.com",
-  messagingSenderId: "PASTE_MESSAGING_SENDER_ID",
-  appId: "PASTE_FIREBASE_APP_ID"
+  apiKey: "AIzaSyCg5ilT2OEuxB118s59VIeKTecirzHRUuI",
+  authDomain: "joker-1a8fe.firebaseapp.com",
+  databaseURL: "https://joker-1a8fe-default-rtdb.firebaseio.com",
+  projectId: "joker-1a8fe",
+  storageBucket: "joker-1a8fe.firebasestorage.app",
+  messagingSenderId: "50380492663",
+  appId: "1:50380492663:web:baeac1702119687c595b72",
+  measurementId: "G-QE50JSS5D8"
 };
