@@ -228,6 +228,7 @@ const server = http.createServer(async (req, res) => {
       const body = await getBody(req);
       const room = rooms.get(String(body.code || "").toUpperCase());
       if (!room) return sendJson(res, 404, { error: "Room not found." });
+      if (body.targetId === body.playerId) return sendJson(res, 400, { error: "Choose another player." });
       if (!room.players.some((player) => player.id === body.targetId)) {
         return sendJson(res, 400, { error: "Choose a player." });
       }

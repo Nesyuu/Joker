@@ -91,6 +91,15 @@
         </button>
       </div>
 
+      <div id="voteReveal" class="vote-reveal hidden" aria-modal="true" role="dialog">
+        <section class="vote-card" aria-labelledby="voteRevealTitle">
+          <span class="caption">Final guess</span>
+          <h2 id="voteRevealTitle">Who is the Joker?</h2>
+          <p>Choose one player to accuse.</p>
+          <div id="voteChoices" class="vote-choices"></div>
+        </section>
+      </div>
+
       <div id="toast" class="toast hidden"></div>
     </main>
     <script type="module" src="/app.js"></script>

@@ -21,6 +21,8 @@ const roleReveal = document.querySelector("#roleReveal");
 const roleRevealBtn = document.querySelector("#roleRevealBtn");
 const roleRevealTitle = document.querySelector("#roleRevealTitle");
 const roleRevealText = document.querySelector("#roleRevealText");
+const voteReveal = document.querySelector("#voteReveal");
+const voteChoices = document.querySelector("#voteChoices");
 const toast = document.querySelector("#toast");
 
 const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -304,7 +306,8 @@ function shouldOpenVoting(room) {
 }
 
 function canCurrentPlayerVote(room) {
-  return room.phase === "voting" && room.me && !room.me.isJoker && room.me.alive;
+  const currentPlayer = room.players.find((player) => player.isYou);
+  return room.phase === "voting" && room.me && !room.me.isJoker && room.me.alive && !currentPlayer?.hasVoted;
 }
 
 function roleKey(room) {
@@ -447,6 +450,22 @@ function waitingButton(label, message) {
   return el;
 }
 
+async function accusePlayer(room, playerId) {
+  try {
+    await updateRoom(room.code, (nextRoom) => {
+      if (playerId === state.playerId) throw new Error("Choose another player.");
+      if (!nextRoom.players.some((item) => item.id === playerId)) throw new Error("Choose a player.");
+      if (nextRoom.phase !== "voting") throw new Error("Voting is not open yet.");
+      const voter = nextRoom.players.find((item) => item.id === state.playerId);
+      if (!voter || voter.isJoker || !voter.alive) throw new Error("Only the last living target can vote.");
+      nextRoom.votes[state.playerId] = playerId;
+      nextRoom.phase = "results";
+    });
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
 function renderActions(room) {
   actions.innerHTML = "";
   const isHost = room.hostId === room.viewerId;
@@ -503,7 +522,7 @@ function renderActions(room) {
 
   if (room.phase === "voting") {
     if (canCurrentPlayerVote(room)) {
-      actions.append(waitingButton("Choose the Joker", "Tap a player below to make your final guess."));
+      actions.append(waitingButton("Choose the Joker", "Pick a name in the pop-up."));
     } else {
       actions.append(waitingButton("Waiting for final guess", "The last living target is choosing."));
     }
@@ -551,7 +570,6 @@ function renderActions(room) {
 function renderPlayers(room) {
   playersList.innerHTML = "";
   playerCount.textContent = String(room.players.length);
-  const canVote = canCurrentPlayerVote(room);
 
   room.players.forEach((player) => {
     const row = document.createElement("div");
@@ -561,27 +579,6 @@ function renderPlayers(room) {
     const name = document.createElement("strong");
     name.textContent = player.isYou ? `${player.name} (you)` : player.name;
     left.append(name);
-
-    if (canVote && !player.isYou) {
-      const vote = document.createElement("button");
-      vote.className = "vote-btn";
-      vote.textContent = `Accuse ${player.name}`;
-      vote.addEventListener("click", async () => {
-        try {
-          await updateRoom(room.code, (nextRoom) => {
-            if (!nextRoom.players.some((item) => item.id === player.id)) throw new Error("Choose a player.");
-            if (nextRoom.phase !== "voting") throw new Error("Voting is not open yet.");
-            const voter = nextRoom.players.find((item) => item.id === state.playerId);
-            if (!voter || voter.isJoker || !voter.alive) throw new Error("Only the last living target can vote.");
-            nextRoom.votes[state.playerId] = player.id;
-            nextRoom.phase = "results";
-          });
-        } catch (error) {
-          showToast(error.message);
-        }
-      });
-      left.append(vote);
-    }
 
     const badges = document.createElement("div");
     badges.className = "badges";
@@ -696,6 +693,7 @@ function render() {
   renderPlayers(room);
   renderLog(room);
   renderRoleReveal(room);
+  renderVoteReveal(room);
 }
 
 function renderRoleReveal(room) {
@@ -716,6 +714,30 @@ function renderRoleReveal(room) {
   roleRevealBtn.dataset.card = room.me.card;
   roleReveal.classList.remove("hidden");
   roleRevealBtn.onclick = () => hideRoleReveal(key);
+}
+
+function renderVoteReveal(room) {
+  voteChoices.innerHTML = "";
+  if (!canCurrentPlayerVote(room)) {
+    voteReveal.classList.add("hidden");
+    return;
+  }
+
+  room.players.forEach((player) => {
+    const choice = document.createElement("button");
+    choice.type = "button";
+    choice.className = `vote-choice ${player.alive ? "alive" : "dead"}`;
+    choice.disabled = player.isYou;
+    const name = document.createElement("strong");
+    name.textContent = player.isYou ? `${player.name} (you)` : player.name;
+    const status = document.createElement("span");
+    status.textContent = player.isYou ? "You cannot vote yourself" : player.alive ? "Alive" : "Dead";
+    choice.append(name, status);
+    choice.addEventListener("click", () => accusePlayer(room, player.id));
+    voteChoices.append(choice);
+  });
+
+  voteReveal.classList.remove("hidden");
 }
 
 async function copyInvite() {

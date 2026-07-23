@@ -553,6 +553,21 @@ h1 {
   animation: reveal-backdrop 220ms ease both;
 }
 
+.vote-reveal {
+  position: fixed;
+  inset: 0;
+  z-index: 19;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(239, 71, 111, 0.26), transparent 30%),
+    radial-gradient(circle at 82% 72%, rgba(6, 167, 125, 0.28), transparent 30%),
+    rgba(23, 32, 51, 0.52);
+  backdrop-filter: blur(10px);
+  animation: reveal-backdrop 220ms ease both;
+}
+
 .role-reveal.is-leaving {
   pointer-events: none;
   animation: reveal-backdrop-out 320ms ease both;
@@ -606,6 +621,80 @@ h1 {
 
 .role-reveal.is-leaving .role-card {
   animation: role-card-down 320ms cubic-bezier(.5, 0, .8, .2) both;
+}
+
+.vote-card {
+  width: min(90vw, 380px);
+  max-height: min(680px, 88vh);
+  overflow: auto;
+  padding: 22px;
+  border: 2px solid rgba(255, 255, 255, 0.72);
+  border-radius: 8px;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 20% 14%, rgba(255, 255, 255, 0.78), transparent 28%),
+    linear-gradient(135deg, #fff8eb 0%, #d8f3ff 52%, #ffe1ec 100%);
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.32);
+  animation: vote-card-in 360ms cubic-bezier(.2, .8, .2, 1) both;
+}
+
+.vote-card h2 {
+  margin-top: 8px;
+  font-family: Georgia, serif;
+  font-size: clamp(2.1rem, 10vw, 3.7rem);
+  line-height: 0.95;
+}
+
+.vote-card p {
+  margin-top: 10px;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.vote-choices {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.vote-choice {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 58px;
+  padding: 12px 14px;
+  border-color: rgba(23, 32, 51, 0.14);
+  background: rgba(255, 255, 255, 0.88);
+  text-align: left;
+  box-shadow: 0 10px 20px rgba(23, 32, 51, 0.1);
+}
+
+.vote-choice strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.vote-choice span {
+  padding: 5px 8px;
+  border-radius: 8px;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--green), var(--teal));
+  font-size: 0.74rem;
+  font-weight: 900;
+}
+
+.vote-choice.dead span {
+  background: linear-gradient(135deg, var(--red), #ff8fab);
+}
+
+.vote-choice:disabled {
+  cursor: not-allowed;
+  opacity: 0.64;
+}
+
+.vote-choice:disabled span {
+  background: linear-gradient(135deg, var(--muted), #98a2b3);
 }
 
 .log-item {
@@ -718,6 +807,17 @@ h1 {
   to {
     opacity: 0;
     transform: translateY(72vh) rotate(7deg) scale(0.9);
+  }
+}
+
+@keyframes vote-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(28px) rotate(3deg) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotate(0) scale(1);
   }
 }
 
